@@ -1,37 +1,59 @@
-import { StatusBar } from 'expo-status-bar';
-import { useEffect, useState } from 'react';
-import { ActivityIndicator, StyleSheet, TextInput, View } from 'react-native';
-import Input from './components/Input';
+import { useState } from 'react';
+import { ActivityIndicator, StyleSheet, TextInput, View, Button, Text } from 'react-native';
 
 export default function App() {
   
   const [searchQuery, setSearchQuery] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+
+  const [currentTemp, setCurrentTemp] = useState('');
+  // const [feelsLike, setFeelsLike] = useState('');
+  // const [minTemp, setMinTemp] = useState('');
+  // const [maxTemp, setMaxTemp] = useState('');
+  // const [pressure, setPressure] = useState('');
+  // const [humidity, setHumidity] = useState('');
+  // const [windSpeed, setWindSpeed] = useState('');
+  // const [windDegree, setWindDegree] = useState('');
+  // const [date, setDate] = useState('');
+
+  
 
   const api = {
     url: "https://api.openweathermap.org/data/2.5/",
     key: "2e7d702ab251babde4b714ed88c48e60"
   }
 
-  const handleFetch = (query) => {
-    // setSearchQuery(query);
-    fetch(`${api.url}weather?q=${query}&units=imperial&appid=${api.key}`)
+  const handleFetch = () => {
+    setIsLoading(true);
+    console.log('searchQuery', searchQuery);
+    fetch(`${api.url}weather?q=${searchQuery}&units=imperial&appid=${api.key}`)
       .then(res => res.json())
-      .then(data => console.log(data));
+      .then(data => {
+        console.log(data)
+        setCurrentTemp(data.main.temp);
+        setIsLoading(false);
+        setSearchQuery('');
+      });
   }
 
-  // TODO: Capture text input and use it to fetch
-  // READ THIS: https://stackoverflow.com/questions/60091873/how-to-get-values-from-textinput
-
   return (
-    <View >
-      <TextInput
-                style={styles.input}
-                onEndEditing={(query) => handleFetch(query)}
-                placeholder="Search by City"
-                defaultValue={searchQuery}
-                keyboardType='default'
-      />
-    </View>
+    <>
+      <View>
+        <TextInput
+                  style={styles.input}
+                  onChangeText={(query) => setSearchQuery(query)}
+                  placeholder="Search by City"
+                  defaultValue={searchQuery}
+                  keyboardType='default'
+        />
+        <Button 
+          style={styles.searchButton}
+          onPress={handleFetch}
+          title="Search"
+        />
+        {isLoading ? <ActivityIndicator size="large"/> : currentTemp === '' ? <Text></Text> : <Text>Current: {currentTemp}</Text>}
+      </View>
+    </>
   );
 }
 
@@ -48,4 +70,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     padding: 10,
   },
+  searchButton: {
+    margin: 10
+  }
 });
